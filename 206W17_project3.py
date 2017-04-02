@@ -14,6 +14,7 @@ import twitter_info # same deal as always...
 import json
 import sqlite3
 
+
 ## Your name:
 ## The names of anyone you worked with on this project:
 
@@ -72,8 +73,7 @@ def get_user_tweets(user_handle):
 # Write an invocation to the function for the "umich" user timeline and save the result in a variable called umich_tweets:
 
 umich_tweets = get_user_tweets("umich")
-print("------- TESTING -------")
-print (len(umich_tweets))
+
 
 
 ## Task 2 - Creating database and loading data into database
@@ -147,23 +147,17 @@ description = []
 for t in umich_tweets:
 	if len(t['entities']['user_mentions']) >= 1:
 		for i in t['entities']['user_mentions']:
-			print(i['id_str'])
-			print("--------- USER MENTION YAY!!!! ------------")
 			user_id.append(i['id_str'])
 			screen_name.append(i['screen_name'])
-	user_id.append(t['user']['id_str'])
-	screen_name.append(t['user']['screen_name'])
-	# print("------------ TESTING ---------------")
-	# print(type(t['user']))
-	# print(type(t['user']['entities']))
-	# print(t['user']['entities'].keys())
-	# print(type(t['user']['entities']['user_mentions']))
-	# if len(t['entities']['user_mentions']) >= 1:
-	# 	for i in t['entities']['user_mentions']:
-	# 		print(i['id_str'])
-	# 		screen_name.append(i['screen_name'])
-	num_favs.append(t['favorite_count'])
-	description.append(t['user']['description'])
+	if t['user']['id_str'] not in user_id:
+		user_id.append(t['user']['id_str'])
+	if t['user']['screen_name'] not in screen_name:
+		screen_name.append(t['user']['screen_name'])
+
+for n in screen_name:
+	user_object = api.get_user(n)
+	num_favs.append(user_object['favourites_count'])
+	description.append(user_object['description'])
 
 users_list = zip (user_id, screen_name, num_favs, description)
 
@@ -171,6 +165,7 @@ table_spec = 'INSERT OR IGNORE INTO Users VALUES (?,?,?,?)'
 for u in users_list:
 	cur.execute(table_spec, u)
 conn.commit()
+
 
 
 
@@ -200,7 +195,7 @@ for s in screen:
 q3 = 'SELECT * FROM Tweets WHERE retweets > 25'
 cur.execute(q3)
 more_than_25_rts = cur.fetchall()
-print(more_than_25_rts)
+
 
 # Make a query to select all the descriptions (descriptions only) of the users who have favorited more than 25 tweets. Access all those strings, and save them in a variable called descriptions_fav_users, which should ultimately be a list of strings.
 q4 = 'SELECT description FROM Users WHERE num_favs > 25'
@@ -214,23 +209,56 @@ for f in favs:
 q5 = 'SELECT Users.screen_name, Tweets.tweet_text FROM Tweets INNER JOIN Users on Tweets.user_id = Users.user_id WHERE Tweets.retweets > 10  '
 cur.execute(q5)
 joined_result = cur.fetchall()
-print(joined_result)
+
 
 
 ## Task 4 - Manipulating data with comprehensions & libraries
 
 ## Use a set comprehension to get a set of all words (combinations of characters separated by whitespace) among the descriptions in the descriptions_fav_users list. Save the resulting set in a variable called description_words.
 
+# for d in descriptions_fav_users:
+# 	for word in d.split():
+# 		description_words.append(word)
+
+description_words = {word for d in descriptions_fav_users for word in d.split()}
 
 
 ## Use a Counter in the collections library to find the most common character among all of the descriptions in the descriptions_fav_users list. Save that most common character in a variable called most_common_char. Break any tie alphabetically (but using a Counter will do a lot of work for you...).
+cnt = collections.Counter()
+for d in descriptions_fav_users: 
+	for w in d.split():
+			for a in list(w):
+				cnt[a.lower()] += 1
+print("------------ PRINT MAX ---------")
+most_common_char = cnt.most_common(1)[0][0]
+print(most_common_char)
 
 
 
 ## Putting it all together...
 # Write code to create a dictionary whose keys are Twitter screen names and whose associated values are lists of tweet texts that that user posted. You may need to make additional queries to your database! To do this, you can use, and must use at least one of: the DefaultDict container in the collections library, a dictionary comprehension, list comprehension(s). Y
 # You should save the final dictionary in a variable called twitter_info_diction.
+q7 = 'SELECT screen_name FROM Users'
+cur.execute(q7)
+names = cur.fetchall()
+user_names = [n[0] for n in names]
 
+tweet_list = []
+for u in user_names:
+	tweets = []
+	for user_tweet in get_user_tweets(u):
+		tweets.append(user_tweet["text"])
+	tweet_list.append(tweets)
+
+
+
+
+
+
+
+
+# tweet_list = [tweet['text'] for u in user_names for user_tweet in get_user_tweets(u) for tweet in user_tweet]
+# print("---------- LIST OF TWEETS -------")
 
 
 ### IMPORTANT: MAKE SURE TO CLOSE YOUR DATABASE CONNECTION AT THE END OF THE FILE HERE SO YOU DO NOT LOCK YOUR DATABASE (it's fixable, but it's a pain). ###
