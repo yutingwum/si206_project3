@@ -254,13 +254,25 @@ user_names = [n[0] for n in names]
 # print(type(tweets))
 # print(len(tweets))
 
+def get_tweet_text(example):
+	results = [i["text"] for i in example]
+	# for i in example:
+	# 	results.append(i["text"])
+	return results
 
-tweet_list = []
-for u in user_names:
-	tweets = []
-	for user_tweet in get_user_tweets(u):
-		tweets.append(user_tweet["text"])
-	tweet_list.append(tweets)
+
+tweet_list = [get_tweet_text(get_user_tweets(u)) for u in user_names]
+
+
+
+
+
+# tweet_list = []
+# for u in user_names:
+# 	tweets = []
+# 	for user_tweet in get_user_tweets(u):
+# 		tweets.append(user_tweet["text"])
+# 	tweet_list.append(tweets)
 
 twitter_info_diction = dict(zip(user_names, tweet_list))
 
