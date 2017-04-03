@@ -146,22 +146,14 @@ description = []
 
 for t in umich_tweets:
 	if len(t['entities']['user_mentions']) >= 1:
-		print("ENTER IF STATEMENT")
 		for i in t['entities']['user_mentions']:
 			if i['id_str'] not in user_id:
 				user_id.append(i['id_str'])
 				name = i['screen_name'].lower()
-				print (name)
 				screen_name.append(name)
-			print("------ PRINT SCREEN NAME NOW!!!! --------")
-			print(screen_name)
-			print("------ END APPENDING MENTIONS")
 	if t['user']['id_str'] not in user_id:
 		user_id.append(t['user']['id_str'])
 		screen_name.append(t['user']['screen_name'])
-	print("----------- PRINT RESULTS ------")
-	print(screen_name)
-	print("*******************************************************")
 
 for n in screen_name:
 	user_object = api.get_user(n)
@@ -238,7 +230,6 @@ for d in descriptions_fav_users:
 	for w in d.split():
 			for a in list(w):
 				cnt[a.lower()] += 1
-print("------------ PRINT MAX ---------")
 most_common_char = cnt.most_common(1)[0][0]
 print(most_common_char)
 
@@ -251,6 +242,18 @@ q7 = 'SELECT screen_name FROM Users'
 cur.execute(q7)
 names = cur.fetchall()
 user_names = [n[0] for n in names]
+# tweets = [get_user_tweets(u) for u in user_names]
+# print(type(tweets))
+# print(len(tweets))
+# print("*****************************")
+# print(type(tweets[1]))
+# print(len(tweets[1]))
+# print(type(tweets[1][0]))
+
+# tweets = [i["text"] for u in user_names for i in get_user_tweets(u)]
+# print(type(tweets))
+# print(len(tweets))
+
 
 tweet_list = []
 for u in user_names:
@@ -258,6 +261,8 @@ for u in user_names:
 	for user_tweet in get_user_tweets(u):
 		tweets.append(user_tweet["text"])
 	tweet_list.append(tweets)
+
+twitter_info_diction = dict(zip(user_names, tweet_list))
 
 
 
