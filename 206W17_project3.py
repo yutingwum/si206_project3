@@ -146,13 +146,22 @@ description = []
 
 for t in umich_tweets:
 	if len(t['entities']['user_mentions']) >= 1:
+		print("ENTER IF STATEMENT")
 		for i in t['entities']['user_mentions']:
-			user_id.append(i['id_str'])
-			screen_name.append(i['screen_name'])
+			if i['id_str'] not in user_id:
+				user_id.append(i['id_str'])
+				name = i['screen_name'].lower()
+				print (name)
+				screen_name.append(name)
+			print("------ PRINT SCREEN NAME NOW!!!! --------")
+			print(screen_name)
+			print("------ END APPENDING MENTIONS")
 	if t['user']['id_str'] not in user_id:
 		user_id.append(t['user']['id_str'])
-	if t['user']['screen_name'] not in screen_name:
 		screen_name.append(t['user']['screen_name'])
+	print("----------- PRINT RESULTS ------")
+	print(screen_name)
+	print("*******************************************************")
 
 for n in screen_name:
 	user_object = api.get_user(n)
@@ -249,6 +258,7 @@ for u in user_names:
 	for user_tweet in get_user_tweets(u):
 		tweets.append(user_tweet["text"])
 	tweet_list.append(tweets)
+
 
 
 
